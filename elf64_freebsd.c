@@ -132,13 +132,45 @@ elf64_exec(struct preloaded_file *fp)
 		PT4[i] = (p4_entry_t) 0x3000;
 		PT4[i] |= PG_V | PG_RW | PG_U;
 
-		/* Each slot of the level 3 pages points to the same level 2 page */
-		PT3[i] = (p3_entry_t) 0x4000;
-		PT3[i] |= PG_V | PG_RW | PG_U;
+		
+	           	
+	if(i%4==0)
+	{
+		
+	    PT3[i] = (p3_entry_t)0x7000;
+	    PT3[i] |= PG_V | PG_RW | PG_U;
+	}
+	else if(i%4==1)
+	{
+	   
+	    PT3[i] = (p3_entry_t)0x4000;
+	    PT3[i] |= PG_V | PG_RW | PG_U;
+	}
+	else if(i%4==2)
+	{
+            	
+	    PT3[i] = (p3_entry_t)0x6000;
+	    PT3[i] |= PG_V | PG_RW | PG_U;
+	}
+	else
+	{
+	    
+	   PT3[i] = (p3_entry_t)0x5000;
+	   PT3[i] |= PG_V | PG_RW | PG_U;
+	}
 
-		/* The level 2 page slots are mapped with 2MB pages for 1GB. */
-		PT2[i] = i * (2 * 1024 * 1024);
-		PT2[i] |= PG_V | PG_RW | PG_PS | PG_U;
+	/* The level 2 page slots are mapped with 2MB pages for 1GB. */
+	PT2[i] = i * (2 * 1024 * 1024);
+	PT2[i] |= PG_V | PG_RW | PG_PS | PG_U;
+	PT2_A[i] = i * (2 * 1024 * 1024)+1024*1024*1024*1;
+	PT2_A[i] |= PG_V | PG_RW | PG_PS | PG_U;
+	PT2_B[i] = i * (2 * 1024 * 1024)+1024*1024*1024*2;
+	PT2_B[i] |= PG_V | PG_RW | PG_PS | PG_U;
+	PT2_C[i] = i * (2 * 1024 * 1024)+1024*1024*1024*3;
+	PT2_C[i] |= PG_V | PG_RW | PG_PS | PG_U;
+    }
+		
+		
 	}
 
 #ifdef DEBUG
@@ -154,6 +186,9 @@ elf64_exec(struct preloaded_file *fp)
 	CALLBACK(copyin, PT4, 0x2000, sizeof(PT4));
 	CALLBACK(copyin, PT3, 0x3000, sizeof(PT3));
 	CALLBACK(copyin, PT2, 0x4000, sizeof(PT2));
+	CALLBACK(copyin, PT2_A, 0x5000, sizeof(PT2));
+	CALLBACK(copyin, PT2_B, 0x6000, sizeof(PT2));
+	CALLBACK(copyin, PT2_C, 0x7000, sizeof(PT2));
 	CALLBACK(setreg, 4, 0x1000);
 
 	CALLBACK(setmsr, MSR_EFER, EFER_LMA | EFER_LME);
@@ -162,8 +197,8 @@ elf64_exec(struct preloaded_file *fp)
 	CALLBACK(setcr, 0, CR0_PG | CR0_PE | CR0_NE);
 
 	setup_freebsd_gdt(gdtr);
-	CALLBACK(copyin, gdtr, 0x5000, sizeof(gdtr));
-        CALLBACK(setgdt, 0x5000, sizeof(gdtr));
+	CALLBACK(copyin, gdtr, 0x8000, sizeof(gdtr));
+        CALLBACK(setgdt, 0x8000, sizeof(gdtr));
 
 	CALLBACK(exec, ehdr->e_entry);
 

@@ -149,13 +149,13 @@ elf64_exec(struct preloaded_file *fp)
 	else if(i%4==2)
 	{
             	
-	    PT3[i] = (p3_entry_t)0x6000;
+	    PT3[i] = (p3_entry_t)0x5000;
 	    PT3[i] |= PG_V | PG_RW | PG_U;
 	}
 	else
 	{
 	    
-	   PT3[i] = (p3_entry_t)0x5000;
+	   PT3[i] = (p3_entry_t)0x6000;
 	   PT3[i] |= PG_V | PG_RW | PG_U;
 	}
 
